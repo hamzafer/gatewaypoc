@@ -1,6 +1,6 @@
 import './App.css';
 
-function createSession()
+async function createSession()
 {
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
@@ -19,13 +19,16 @@ function createSession()
         redirect: 'follow'
     };
 
-    fetch("http://localhost:8010/proxy/api/rest/version/63/merchant/GAPP/session", requestOptions)
+    return fetch("http://localhost:8010/proxy/api/rest/version/63/merchant/GAPP/session", requestOptions)
         .then(response => response.text())
-        .then(result => console.log(result))
+        .then(result => {
+            console.log(result);
+            return result;
+        })
         .catch(error => console.log('error', error));
 }
 
-function updateSession()
+async function updateSession()
 {
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
@@ -45,9 +48,14 @@ function updateSession()
         redirect: 'follow'
     };
 
-    const url = "https://test-bankalfalah.gateway.mastercard.com/api/rest/version/63/merchant/GAPP/session/";
+    const result = await createSession();
 
-    fetch("https://test-bankalfalah.gateway.mastercard.com/api/rest/version/63/merchant/GAPP/session/SESSION0002007359619F5130199K91", requestOptions)
+    const obj = JSON.parse(result);
+    const sessionId = obj.session.id;
+
+    const url = "http://localhost:8010/proxy/api/rest/version/63/merchant/GAPP/session/" + sessionId;
+
+    fetch(url, requestOptions)
         .then(response => response.text())
         .then(result => console.log(result))
         .catch(error => console.log('error', error));
@@ -57,7 +65,7 @@ function App()
 {
     return (
         <>
-            <button id="generate-btn" onClick={createSession}>generate quote
+            <button id="generate-btn" onClick={updateSession}>generate quote
             </button>
         </>
     );
